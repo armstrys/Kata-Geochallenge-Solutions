@@ -213,6 +213,7 @@ with st.echo():
         late_year = 1e5
         for fossil, years in fossilYear_dict.items():
             if max(years) < late_year:
+                late_year = max(years)
                 idFossil = fossil
         return idFossil
 
