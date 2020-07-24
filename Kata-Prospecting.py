@@ -37,10 +37,10 @@ def check_answer(questionNum,answer):
 
 
 ## Request Challenge Description
-url = 'https://kata.geosci.ai/challenge/prospecting'  # <--- In week 2, you'll change the name.
+url = 'https://kata.geosci.ai/challenge/prospecting'  
 r = get_question(url)
 
-if st.checkbox('Uncheck to hide instructions for this challenge?', value=True):
+if st.checkbox('Uncheck to hide instructions for this challenge.', value=True):
     st.markdown(r.text)
 
 ## Set up request framework for QA
