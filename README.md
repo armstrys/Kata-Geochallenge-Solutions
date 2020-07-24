@@ -6,8 +6,9 @@ challenges on your own then please visit this
 [Jupyter Notebook](https://colab.research.google.com/drive/1eP68NTV-GA3R-BYUh-CUxcgYDQ5IuetS)
 to get started.
 
+You can run these dashboards directly from the github raw links after installing Streamlit. For example,
 ```
-streamlit run url_to_github.py
+streamlit run https://raw.githubusercontent.com/armstrys/Kata-Geochallenge-Solutions/master/Kata-Fossil-Hunting.py
 ```
   
 Dependencies:

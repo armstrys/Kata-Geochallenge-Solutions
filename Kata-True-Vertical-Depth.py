@@ -39,7 +39,9 @@ def check_answer(questionNum,answer):
 ## Request Challenge Description
 url = 'https://kata.geosci.ai/challenge/true-vertical-depth'  # <--- In week 2, you'll change the name.
 r = get_question(url)
-st.markdown(r.text, unsafe_allow_html=True)
+
+if st.checkbox('Uncheck to hide instructions for this challenge?', value=True):
+    st.markdown(r.text, unsafe_allow_html=True)
 
 ## Set up request framework for QA
 st.header('Solution')

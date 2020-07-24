@@ -32,7 +32,7 @@ def check_answer(questionNum,answer):
               'answer':answer
              }
     result = requests.get(url, params).text
-    if 'correct'  in result[0:8].lower():
+    if 'correct' in result[0:8].lower():
         st.balloons()
     return result
 
@@ -40,11 +40,15 @@ def check_answer(questionNum,answer):
 ## Request Challenge Description
 url = 'https://kata.geosci.ai/challenge/birthquakes'  # <--- In week 2, you'll change the name.
 r = get_question(url)
-st.markdown(r.text)
+
+if st.checkbox('Uncheck to hide instructions for this challenge?', value=True):
+    st.markdown(r.text)
 
 ## Set up request framework for QA
 st.header('Solution')
-st.markdown('The data for this Kata challenge will be randomized based upon the key below. Feel free to change it to check the consistency of answers!')
+st.markdown('''For this challenge, the data will come from a date if entered in the same format as the date below.
+               Feel free to change it to check the consistency of answers!
+            ''')
 my_key = st.text_input(label='Enter a key to initiate request (any string of characters)',value='1990-08-27')
 
 ## Input
