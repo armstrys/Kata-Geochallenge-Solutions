@@ -87,7 +87,7 @@ with st.echo():
 
     answer1 = data['Datum'].max()
 
-st.write('The highest datum of all wells is ', answer1)
+st.write(f'The highest elevation well is at **{answer1} m** elevation.)
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.write(result)
@@ -117,7 +117,7 @@ st.dataframe(data[['Kickoff','MD','Inclination','TD_Offset']]
                         .sort_values('TD_Offset', ascending=False).head())
 
 
-st.write(f'The maximum offset is {answer2} m.')
+st.write(f'The maximum offset is **{answer2} m**.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer2)
     st.write(result)
@@ -151,7 +151,7 @@ st.dataframe(data[['Datum','Kickoff','MD','Inclination','TVDSS']]
                         .sort_values('TVDSS', ascending=True).head())
 
 
-st.write(f'The largest total vertical depth is {answer3} m.')
+st.write(f'The largest total vertical depth is **{answer3} m**.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer3)
     st.write(result)
@@ -187,7 +187,7 @@ st.dataframe(data_subset[['Datum','Kickoff','MD','Inclination','TVDSS','YOffset2
                         .sort_values('YOffset2000', ascending=False).head())
 
 
-st.write(f'{answer4} wells with y offset > 100m at {sliceSS} m depth.')
+st.write(f'There are **{answer4}** wells with y-offset greater than 100m at {sliceSS} m depth.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer4)
     st.write(result)

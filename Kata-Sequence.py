@@ -85,7 +85,7 @@ with st.echo():
     ## calculate thickness
     answer1 = sequence.count(lith_thick)*sample   #counting occurences in str
 
-st.write(f'Total thickness of facies {lith_thick} is {answer1} m.')
+st.write(f'Total thickness of facies {lith_thick} is **{answer1} m**.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.markdown(result)
@@ -114,7 +114,7 @@ with st.echo():
     regex_pattern = lith_count+'{'+str(thresh)+',}'
     answer2 = re.subn(regex_pattern,'',sequence)[1]
 
-st.write(f'''There are {answer2} beds of facies {lith_count}
+st.write(f'''There are **{answer2} beds** of facies {lith_count}
              with a sample threshold of {thresh}''')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer2)
@@ -141,7 +141,7 @@ with st.echo():
     answer3ID = max(transition_dict.keys(), key=(lambda k: transition_dict[k]))
 
 st.write('Lithology transitions:',transition_dict)
-st.write(f'The most common transision is {answer3ID} and occurs {answer3} times!')
+st.write(f'The most common transision is {answer3ID} and occurs **{answer3}** times!')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer3)
     st.markdown(result)

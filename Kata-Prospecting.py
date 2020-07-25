@@ -114,7 +114,7 @@ with st.echo():
     zrmap = zeroReliable(maps)
     answer1 = int(np.sum(zrmap==1))
 
-st.write(f'There are {answer1} pixels with zero reliability.')
+st.write(f'There are **{answer1} pixels** with zero reliability.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.write(result)
@@ -159,7 +159,7 @@ with st.echo():
     answer2 = int(np.sum(aXXmap==1))
 
 st.write(f'''
-          There are {answer2} pixels with porosity >P{porThresh}
+          There are **{answer2} pixels** with porosity >P{porThresh}
           and fracture density >P{fracThresh}!
           ''')
 if st.button(f'Check question {questionNum}'):
@@ -187,7 +187,7 @@ with st.echo():
     answer3 = int(np.sum(pmap==1))
 
 st.write(f'''
-         There are {answer3} prospective pixels on this map
+         There are **{answer3} prospective pixels** on this map
          using the cut-offs assigned above.
          ''')
 
@@ -236,7 +236,7 @@ with st.echo():
     lat, lon = com(pmap)
     answer4 = int(np.floor(lat) * np.floor(lon))
 
-st.write(f'The product of largest prospect coordinates is {answer4}.')
+st.write(f'The product of largest prospect coordinates is **{answer4}**.')
 
 if porThresh!=50 or fracThresh!=50:
     st.warning('''

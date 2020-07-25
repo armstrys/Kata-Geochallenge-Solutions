@@ -71,7 +71,7 @@ with st.echo():
 
     answer1 = len(boreholes)
 
-st.write(f'There are {answer1} boreholes.')
+st.write(f'There are **{answer1} boreholes**.')
 if st.button(f'Check question {questionNum}'):
     st.markdown(check_answer(questionNum,answer1))
 
@@ -95,7 +95,7 @@ with st.echo():
 
     answer2 = int(round(distance(boreholes,0,1)))
 
-st.write(f'The distance between the first two boreholes is ~{answer2} m.')
+st.write(f'The distance between the first two boreholes is ~**{answer2} m**.')
 if st.button(f'Check question {questionNum}'):
     st.markdown(check_answer(questionNum,answer2))
 
@@ -138,7 +138,7 @@ with st.echo():
 
     answer3 = int(round(mean_distance(boreholes)))
 
-st.write(f'The mean distance between boreholes is {answer3} m.')
+st.write(f'The mean distance between boreholes is **{answer3} m**.')
 if st.button(f'Check question {questionNum}'):
     st.markdown(check_answer(questionNum,answer3))
 
@@ -189,6 +189,6 @@ with st.echo():
 
     answer4 = int(sum(flag_clump(boreholes,answer1/5,answer3/4)))
 
-st.write(f'There are {answer4} wells that are considered in a clump.')
+st.write(f'There are **{answer4} wells** that are considered in a clump.')
 if st.button(f'Check question {questionNum}'):
     st.markdown(check_answer(questionNum,answer4))    

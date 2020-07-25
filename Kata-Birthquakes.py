@@ -82,7 +82,7 @@ with st.echo():
 
     answer1 = len(data)
 
-st.write(f'There are {answer1} records.')
+st.write(f'There are **{answer1} records**.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.write(result)
@@ -103,7 +103,7 @@ with st.echo():
 
 st.dataframe(data.head())
 
-st.write(f'The largest earthquake on this day was {answer2:.0f} meters deep!')
+st.write(f'The largest earthquake on this day was **{answer2:.0f} meters** deep!')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer2)
     st.write(result)
@@ -135,7 +135,7 @@ with st.echo():
     loc2 = data.iloc[1][['Latitude','Longitude']].values
     answer3 = int(haversine(loc1, loc2))
 
-st.write(f'The epicenters of the two largest earthquakes were ~{answer3} km apart.')
+st.write(f'The epicenters of the two largest earthquakes were ~**{answer3} km** apart.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer3)
     st.write(result)
@@ -159,7 +159,7 @@ with st.echo():
 
 answer4 = int(count)
 
-st.write(f'There were {answer4} pairs of earthquakes within 100 km of each other.')
+st.write(f'There were **{answer4}** pairs of earthquakes within 100 km of each other.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer4)
     st.write(result)

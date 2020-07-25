@@ -135,7 +135,7 @@ with st.echo():
 st.write('Here are the abundances of each fossil:')
 st.write(total_dict)
 
-st.write(f'The most abundant fossil, {mostID}, was counted {answer1} times!')
+st.write(f'The most abundant fossil, {mostID}, was counted **{answer1}** times!')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.write(result)
@@ -173,7 +173,7 @@ with st.echo():
     answer2 = float(omd_year)
 
 st.write(f'''
-         Oldest year of maximum diversity was {answer2} mya with all these fossils:
+         Oldest year of maximum diversity was **{answer2} mya** with all these fossils:
          {''.join((abundance_dict[omd_year].keys()))}
          ''')
 if st.button(f'Check question {questionNum}'):
@@ -223,7 +223,7 @@ with st.echo():
 
 st.write(f'''
          {span_select} first appeared {first} mya and was last seen {last} mya.
-         That gives a span of {answer3:.1f} million years!
+         That gives a span of **{answer3:.1f} million years**!
          ''')
 
 if st.button(f'Check question {questionNum}'):
@@ -295,7 +295,7 @@ with st.echo():
 
 st.write(f'''
          The fossil {idFossil} first appeared {first_appear} mya and was present
-         until {answer4} mya.
+         until **{answer4} mya**.
          ''')
 
 if st.button(f'Check question {questionNum}'):

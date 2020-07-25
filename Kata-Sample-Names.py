@@ -73,7 +73,7 @@ with st.echo():
     
     answer1 = len(samples_df)
 
-st.write(f'There are {answer1} valid samples.')
+st.write(f'There are **{answer1} valid samples**.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.markdown(result)
@@ -117,7 +117,7 @@ with st.echo():
 
     answer2 = len(df_match(samples_df,'Basin_Name','ainsa'))
 
-st.write(f'There are {answer2} valid samples in the Ainsa Basin.')
+st.write(f'There are **{answer2} valid samples** in the Ainsa Basin.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer2)
     st.markdown(result)
@@ -152,7 +152,7 @@ with st.echo():
     df_ainsa = df_match(samples_df,'Basin_Name','ainsa')
     answer3 = int(longest_gap(df_ainsa))
 
-st.write(f'Longest gap between Ainsa Basin valid samples was {answer3} days')
+st.write(f'Longest gap between Ainsa Basin valid samples was **{answer3} days**.')
 
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer3)
