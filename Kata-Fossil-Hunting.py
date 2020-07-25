@@ -1,4 +1,7 @@
 import streamlit as st
+import seaborn as sns
+import matplotlib
+import matplotlib.pyplot as plt
 import requests
 import re
 
@@ -42,17 +45,31 @@ if st.checkbox('Uncheck to hide instructions for this challenge.', value=True):
     st.markdown(r.text)
 
 ## Set up request framework for QA
-st.header('Solution')
+st.title('My solution')
 st.markdown('The data for this Kata challenge will be randomized based upon the key below. Feel free to change it to check the consistency of answers!')
 my_key = st.text_input(label='Enter a key to initiate request (any string of characters)',value='armstrys')
 
 ## Input
 r = get_data(url, my_key)
 
-st.header('The first 400 input data:')
+st.subheader('The first 400 input data:')
 st.markdown(r.text[:400])
 
-st.header('Making the text meaningful')
+st.subheader('Making the text meaningful')
+st.write('''
+         The input text to this challenge is complicated. We don't have any sort
+         of delimiting characters. Both the ages and the content of the samples vary
+         in length. We even have samples (at least 1) that don't contain any fossils.
+         To extract the samples we are going to use a find all and look for a set of
+         4 digits(`0-9`) or a decimal point (`.`) followed by 1 or more of any other character.
+         Fortunately, `re` will have no problem recognizing the emojis as other characters!
+         
+         We'll then create a nested dictionary that is organized first by ages and then
+         by fossil. Each fossil will then have a count of it's abundance during that year.
+         Later we will need to reorganize this dictionary to be more easily keyed into by
+         fossil types, but this initial organization will get us through a few questions.
+         ''')
+
 with st.echo():
     @st.cache()
     def process_text(text):
@@ -75,17 +92,25 @@ with st.echo():
                     sample_dict.update({fossil:1})
                 else:
                     sample_dict[fossil] += 1
-
+            
+            ## Assign the sample dictionary to the appropriate age
             abundance_dict.update({age:sample_dict})
         return abundance_dict
 
     abundance_dict = process_text(r.text)
-    st.write('Here are the first 5 entries in our new dictionary!')
-    st.write(dict(list(abundance_dict.items())[:5]))
+
+## Create select box to check abundance
+abundance_select = st.selectbox('Choose an age to see the fossil counts!',
+                                options=sorted(list(abundance_dict.keys())))
+st.write(abundance_dict[abundance_select])
 
 ## Q1!
 questionNum = 1
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         To find the most abundant fossil, just loop through our ages and create
+         a new dictionary that stores total abundance counts by fossil type.
+         ''')
 
 with st.echo():
     @st.cache()
@@ -102,12 +127,15 @@ with st.echo():
                     total_dict[fossil] += abund
         return total_dict
     total_dict = total_abundance(abundance_dict)
-    st.write(total_dict)
 
-    mostID = max(total_dict.keys(), key=(lambda k: total_dict[k]))
+    ## retrieve the most abundant id (for later use) and it's abundance.
     answer1 = max(total_dict.values())
+    mostID = max(total_dict.keys(), key=(lambda k: total_dict[k]))
 
-st.write('Number of records: ', answer1)
+st.write('Here are the abundances of each fossil:')
+st.write(total_dict)
+
+st.write(f'The most abundant fossil, {mostID}, was counted {answer1} times!')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.write(result)
@@ -115,7 +143,13 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q2!
 questionNum = 2
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         According to these fossil records, there were some years that had more diversity
+         than others. We are going to loop through our dictionary and store the the year that
+         has the highest diversity we've seen. If two years have the same diversity, we will
+         take the oldest year.
+         ''')
 
 with st.echo():
     @st.cache()
@@ -135,11 +169,13 @@ with st.echo():
 
         return omd_year, omd
     omd_year, omd = oldest_max_diversity(abundance_dict)
-    st.write(f'{omd_year} mya there was a diversity of {omd}!')
 
     answer2 = float(omd_year)
 
-st.write('Oldest year of max diversity: ', answer2)
+st.write(f'''
+         Oldest year of maximum diversity was {answer2} mya with all these fossils:
+         {''.join((abundance_dict[omd_year].keys()))}
+         ''')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer2)
     st.write(result)
@@ -147,7 +183,13 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q3!
 questionNum = 3
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write(f'''
+         Below we calculate the span (first to last appearance) of the most abundant
+         fossil, {mostID}. There is a select box so that you can check the span of other
+         fossils as well, but the select box will default to the appropriate fossil to answer
+         the question.
+         ''')
 
 with st.echo():
     @st.cache()
@@ -165,13 +207,25 @@ with st.echo():
                 last = year
 
         return first, last
-    first, last = span_ID(mostID, abundance_dict)
-    st.write(f'{mostID} first appeared {first} mya and was last seen {last} mya!')
+
+    # Create a select box to calculate span.
+    # Make sure most abundant fossil is first in list.
+    all_fossils = list(total_dict.keys())
+    all_fossils.remove(mostID)
+    all_fossils.insert(0,mostID)
+    span_select = st.selectbox(label='Calculate the span for which fossil? '+
+                                     'The first option is the most abundant.',
+                               options=all_fossils)
+   
+    first, last = span_ID(span_select, abundance_dict)
 
     answer3 = float(f'{(first-last):.1f}')
 
+st.write(f'''
+         {span_select} first appeared {first} mya and was last seen {last} mya.
+         That gives a span of {answer3:.1f} million years!
+         ''')
 
-st.write(f'Span of {mostID}: ', answer3)
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer3)
     st.write(result)
@@ -179,8 +233,12 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q4!
 questionNum = 4
-st.header(f'Question {questionNum}')
-st.write('First let\'s organize the years of appearance by fossil...')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         First let\'s organize the years of appearance by fossil. This is
+         basically a swap of the keys and values from the first dictionary
+         we created.
+         ''')
 
 with st.echo():
     @st.cache()
@@ -199,10 +257,24 @@ with st.echo():
         return fossilYear_dict
     
     fossilYear_dict = switchKeysValues(abundance_dict)
-    
-st.write(fossilYear_dict)
 
-st.write('Next we can find the fossil with the youngest appearance and calculate it\'s last appearance')
+legend = ''
+for i, items in enumerate(fossilYear_dict.items()):
+    fossil, years = items
+    sns.distplot(years, label=i, norm_hist=False, kde=True)
+    plt.xlim(max(abundance_dict.keys())+10, min(abundance_dict.keys())-10)
+    plt.xlabel('Million years ago')
+    plt.ylabel('Realtive Abundance')
+    plt.title('Relative abundance of fossils through time')
+    legend += f'{i}:{fossil}  '
+st.write('Key for plot legend below',legend)
+plt.legend()
+st.pyplot()
+
+st.write('''
+         Next we can find the fossil with the youngest appearance and calculate it\'s last appearance.
+         You can probably spot this fossil in the chart above.
+         ''')
 
 with st.echo():
     @st.cache()
@@ -221,9 +293,11 @@ with st.echo():
     first_appear = max(fossilYear_dict[idFossil])
     answer4 = min(fossilYear_dict[idFossil])
 
-st.write(f'The first appearance of {idFossil} was {first_appear} mya.')
+st.write(f'''
+         The fossil {idFossil} first appeared {first_appear} mya and was present
+         until {answer4} mya.
+         ''')
 
-st.write(f'The last appearance was: ', answer4)
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer4)
     st.write(result)

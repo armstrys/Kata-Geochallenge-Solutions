@@ -44,14 +44,19 @@ if st.checkbox('Uncheck to hide instructions for this challenge.', value=True):
     st.markdown(r.text, unsafe_allow_html=True)
 
 ## Set up request framework for QA
-st.header('Solution')
+st.title('My solution')
 st.markdown('The data for this Kata challenge will be randomized based upon the key below. Feel free to change it to check the consistency of answers!')
 my_key = st.text_input(label='Enter a key to initiate request (any string of characters)',value='armstrys')
 
 ## Input
 r = get_data(url, my_key)
 
-st.header('Let\'s throw the text in a dataframe')
+st.subheader('Let\'s throw the text in a dataframe')
+st.write('''
+         The input text is relatively tame in this case. We can just pass the text
+         through `io.StringIO` and into `pandas.read_csv`. We'll then eliminate some
+         unknown and `NaN` values.
+         ''')
 
 with st.echo():
     cols = [
@@ -71,15 +76,16 @@ with st.echo():
     data['Kickoff'].fillna(0,inplace=True)
     
 st.dataframe(data.head())
-st.write(data.info())
+
 
 ## Q1!
 questionNum = 1
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('For question 1, all we need to do is find the max of our `Datum` column.')
 
 with st.echo():
 
-    answer1 = int(data['Datum'].max())
+    answer1 = data['Datum'].max()
 
 st.write('The highest datum of all wells is ', answer1)
 if st.button(f'Check question {questionNum}'):
@@ -89,13 +95,21 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q2!
 questionNum = 2
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         The horizontal offset of each well can be calculated using simple
+         trigonometry from the length of the deviated section of the well
+         and the deviation inclination. Azimuth is irrelevant here since we are
+         calculating radial offset. 
+         ''')
 
 with st.echo():
 
+    # length of lower section - possibly deviated
     lowerLength = data['MD'] - data['Kickoff']
-    data['TD_Offset'] = np.sin(np.radians(data['Inclination'])) * lowerLength
 
+    # calculating horizontal offset down to TD
+    data['TD_Offset'] = np.sin(np.radians(data['Inclination'])) * lowerLength
 
     answer2 = round(data['TD_Offset'].max())
 
@@ -111,19 +125,30 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q3!
 questionNum = 3
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         For question 3, we'll be calculating the total vertical depth (subsea).
+         This calculation will be similar to the calcation for question 2, but
+         will also need to take into account the datum of the well. The question
+         asks for the offset at -2000 m subsea, but you can adjust the slider to
+         see how things change.
+         ''')
 
 with st.echo():
 
+    # length of lower section - possibly deviated
     lowerLength = data['MD'] - data['Kickoff']
-    lowerVertical = np.cos(np.radians(data['Inclination'])) * lowerLength
-    data['TVDSS'] = data['Datum'] - data['Kickoff'] - lowerVertical 
 
+    # use trig to calculate vertical component of deviation
+    lowerVertical = np.cos(np.radians(data['Inclination'])) * lowerLength
+
+    # add upper and lower sections of well and adjust for datum
+    data['TVDSS'] = data['Datum'] - data['Kickoff'] - lowerVertical 
 
     answer3 = round(data['TVDSS'].min())
 
 st.dataframe(data[['Datum','Kickoff','MD','Inclination','TVDSS']]
-                        .sort_values('TVDSS', ascending=True))
+                        .sort_values('TVDSS', ascending=True).head())
 
 
 st.write(f'The largest total vertical depth is {answer3} m.')
@@ -132,9 +157,9 @@ if st.button(f'Check question {questionNum}'):
     st.write(result)
 
 
-## Q3!
+## Q4!
 questionNum = 4
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
 
 st.write('''We need to drop some wells. Wells that don\'t reach 2000 m tvdss won\'t be counted,
             and neither will wells that have no deviation. Null azimuths will break
@@ -142,9 +167,8 @@ st.write('''We need to drop some wells. Wells that don\'t reach 2000 m tvdss won
          ''')
 
 with st.echo():
-    sliceSS = st.slider(label='Depth slice to determine offset:',
+    sliceSS = st.slider(label='Subsea depth slice to determine offset:',
                         min_value=-4000, max_value=0, value=-2000)
-    # sliceSS = -2000
     
     # Remove wells that don't hit the depth slice or don't kave a kickoff point above
     data_subset = data[data['TVDSS'] < sliceSS].dropna()
@@ -164,7 +188,6 @@ st.dataframe(data_subset[['Datum','Kickoff','MD','Inclination','TVDSS','YOffset2
 
 
 st.write(f'{answer4} wells with y offset > 100m at {sliceSS} m depth.')
-st.info('Before you check... remember the question asks for offset at -2000 m depth!')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer4)
     st.write(result)

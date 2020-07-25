@@ -11,7 +11,7 @@ st.warning('''
            to get started.
            ''')
 
-## Cached functions to limit requests
+## Cached helper functions to limit requests
 @st.cache()
 def get_data(url, key):
     params = {'key':my_key}
@@ -41,30 +41,51 @@ r = get_question(url)
 if st.checkbox('Uncheck to hide instructions for this challenge.', value=True):
     st.markdown(r.text)
 
-## Set up request framework for QA
-st.header('Solution')
+
+## Set up key to generate data for questions.
+st.title('My Solution')
 st.markdown('The data for this Kata challenge will be randomized based upon the key below. Feel free to change it to check the consistency of answers!')
 my_key = st.text_input(label='Enter a key to initiate request (any string of characters)',value='armstrys')
 
-## Input
+
+## Process input text
 r = get_data(url, my_key)
 
-st.header('Here is the input:')
+st.subheader('Here is the input:')
 st.text(r.text)
+
+st.write('''
+         We should be able to do most of what we need
+         directly with the string. No real processing needed yet.
+         ''')
 with st.echo():
     sequence = r.text
 
 ## Q1!
 questionNum = 1
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         We want to get the total thickess of the sandstone facies 'S'.
+         Luckily, there is already a function for that. We just need to count
+         the number of occurences and multiply by the sample rate, 1 meter.
+         Use the select box to see the other facies thicknesses.
+         ''')
 
 with st.echo():
-    def thickness(sequence,lith='S',sample=1):
-        return sequence.count(lith)*1
 
-    answer1 = thickness(sequence,lith='S',sample=1)
+    ## create widget
+    facies = list(set(sequence))
+    facies.remove('S')         # removing sandstone
+    facies = ['S'] + facies    # to put it at the front so it's default
 
-st.write('Total sand thickness = ',str(answer1))
+    sample = 1       # 1 meter per count / sample rate
+    lith_thick = st.selectbox(label='Total thickness of which facies?',
+                        options= facies
+                        )
+    ## calculate thickness
+    answer1 = sequence.count(lith_thick)*sample   #counting occurences in str
+
+st.write(f'Total thickness of facies {lith_thick} is {answer1} m.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.markdown(result)
@@ -72,16 +93,29 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q2!
 questionNum = 2
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         We want to count the total number of beds of a given facies, in this
+         case, sandstone, 'S'. We can do this by using a regex pattern.
+         Try playing around with the slider and select box to see how counts change.
+         ''')
 
 with st.echo():
-    def transition_to_lith(sequence,lith='S',thresh=1):
-        regex_pattern = lith+'{'+str(thresh)+',}'
-        return re.subn(regex_pattern,'',sequence)[1]
+    
+    ## create widgets
+    thresh = st.slider(label='Minimum consecutive samples to count a bed',
+                       min_value=1, max_value=10, value=1)
+    
+    lith_count = st.selectbox(label='Count beds of which facies?',
+                        options= facies
+                        )
 
-    answer2 = transition_to_lith(sequence,lith='S',thresh=1)
+    ## find repeating occurences of lith and count
+    regex_pattern = lith_count+'{'+str(thresh)+',}'
+    answer2 = re.subn(regex_pattern,'',sequence)[1]
 
-st.write('Total sandstone beds = ',str(answer2))
+st.write(f'''There are {answer2} beds of facies {lith_count}
+             with a sample threshold of {thresh}''')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer2)
     st.markdown(result)
@@ -89,22 +123,25 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q3!
 questionNum = 3
-st.header(f'Question {questionNum}')
-
+st.subheader(f'Question {questionNum}')
+st.write('''
+         To calculate the most common facies transition, we will just create a dictionary
+         to count all facies transitions and then take the maximum. We can iterate over all
+         permutations of the facies list that we created earlier and use regex to flag
+         all occurences of that facies change. For example, a sand to mud (`S` -> `M`) transition
+         will find all occurences of `SM` in our sequence.
+         ''')
 with st.echo():
-    def common_transition(sequence):
-        liths = set(sequence)
-        transition_dict = {}
-        for transition in itertools.permutations(liths,2):
-            regex_pattern = ''.join(transition)
-            transition_dict[regex_pattern] = re.subn(regex_pattern,'',sequence)[1]
-        return transition_dict
+    transition_dict = {}
+    for transition in itertools.permutations(facies,2):
+        regex_pattern = ''.join(transition)
+        transition_dict[regex_pattern] = re.subn(regex_pattern,'',sequence)[1]
 
-    transition_dict = common_transition(sequence)
     answer3 = max(transition_dict.values())
+    answer3ID = max(transition_dict.keys(), key=(lambda k: transition_dict[k]))
 
 st.write('Lithology transitions:',transition_dict)
-st.write('Number of most common:',answer3)
+st.write(f'The most common transision is {answer3ID} and occurs {answer3} times!')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer3)
     st.markdown(result)

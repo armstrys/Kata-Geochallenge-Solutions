@@ -44,14 +44,21 @@ if st.checkbox('Uncheck to hide instructions for this challenge.', value=True):
     st.markdown(r.text)
 
 ## Set up request framework for QA
-st.header('Solution')
+st.title('My solution')
 st.markdown('The data for this Kata challenge will be randomized based upon the key below. Feel free to change it to check the consistency of answers!')
 my_key = st.text_input(label='Enter a key to initiate request (any string of characters)',value='armstrys')
 
 ## Input
 r = get_data(url, my_key)
 
-st.header('Here is a look at our maps:')
+st.subheader('Input data')
+st.write('''
+         Let's take a look at the maps. We make a list of the map values by splitting
+         our text by `\n` and then by `,`. Each line gets resized to a 64x64 np.array
+         and appended to the list. We'll also generate a list of titles so we can keep
+         track of the maps using the list indices. Use the selectbox below to take a
+         look at our maps.
+         ''')
 
 with st.echo():
 
@@ -61,10 +68,11 @@ with st.echo():
     maps = np.array(maps)
 
     map_names = ['Reliability of well data',
-                'Reliability of seismic data',
-                'Porosity from wells and conceptual models',
-                'Fracture density from wells and seismic',
-                'Our land position (1 denotes \'our land\').']
+                 'Reliability of seismic data',
+                 'Porosity from wells and conceptual models',
+                 'Fracture density from wells and seismic',
+                 'Our land position (1 denotes \'our land\').'
+                 ]
 
     name = st.selectbox('Select map to show',options=map_names)
     plt.imshow(maps[map_names.index(name),:,:])
@@ -74,15 +82,30 @@ with st.echo():
 
 ## Q1!
 questionNum = 1
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         To find the pixels with zero total reliability we need to combine the
+         first two maps we were provided. Any pixels that are zero in both the well
+         and seismic reliability maps will be labeled as unreliable.
+         ''')
 
 with st.echo():
     def zeroReliable(maps):
+        '''
+        Use our maps to generate a new map that has a True label for any pixel that
+        has zero reliability in both of our well and seismic reliability maps (these
+        are the first two maps in the array).
+        '''
+
+        ## define reliability maps
         rmaps = maps[:2,:,:]
+
+        ## combine maps and check if equal to 0
         rmap_comb = np.sum(rmaps, axis=0) == 0
 
+        ## Plot new map - True is unrealiable here
         plt.imshow(rmap_comb)
-        plt.title('Total reliability')
+        plt.title('Unreliable Data')
         plt.colorbar()
         st.pyplot()
 
@@ -91,7 +114,7 @@ with st.echo():
     zrmap = zeroReliable(maps)
     answer1 = int(np.sum(zrmap==1))
 
-st.write('Pixels with zero reliability in wells and seismic: ', answer1)
+st.write(f'There are {answer1} pixels with zero reliability.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.write(result)
@@ -100,27 +123,45 @@ if st.button(f'Check question {questionNum}'):
 ## Q2!
 questionNum = 2
 st.header(f'Question {questionNum}')
+st.write('''
+         Now that we know where we can trust our data, we can move on to the
+         subsurface properties. The code block below combines a >P50 porosity map
+         and a >P50 fracture density map to high-grade the best areas on our map.
+         Try playing with the sliders to see how things change if you favor porosity
+         over fracture density and vice versa.
+         ''')
 
 with st.echo():
-    def aboveP50(maps):
-        p50maps = maps[2:4,:,:]
-        p50maps[0,:,:] = p50maps[0,:,:] > np.percentile(p50maps[0,:,:],50)
-        p50maps[1,:,:] = p50maps[1,:,:] > np.percentile(p50maps[1,:,:],50)
-        p50maps_comb = np.prod(p50maps, axis=0)
-        count = np.sum(p50maps_comb==1)
+    def abovePXX(maps,porThresh,fracThresh):
+        '''
+        Take porosity and fracture density maps to generate a map of combined over
+        a threshold for each
+        '''
+        pmaps = maps[2:4,:,:]
+        pmaps[0,:,:] = pmaps[0,:,:] > np.percentile(pmaps[0,:,:],porThresh)
+        pmaps[1,:,:] = pmaps[1,:,:] > np.percentile(pmaps[1,:,:],fracThresh)
+        pmaps_comb = np.prod(pmaps, axis=0)
+        count = np.sum(pmaps_comb==1)
 
-        plt.imshow(p50maps_comb)
+        plt.imshow(pmaps_comb)
         plt.title('Por and fracture density both > P50')
         plt.colorbar()
         st.pyplot()
 
-        return p50maps_comb
+        return pmaps_comb
     
+    porThresh = st.slider(label='Porosity percentile threshold',
+                          min_value=0, max_value=100, value=50, step=5)
+    fracThresh = st.slider(label='Fracture density percentile threshold',
+                           min_value=0, max_value=100, value=50, step=5)
 
-    a50map = aboveP50(maps)
-    answer2 = int(np.sum(a50map==1))
+    aXXmap = abovePXX(maps, porThresh, fracThresh)
+    answer2 = int(np.sum(aXXmap==1))
 
-st.write('Count of >P50 vals: ', answer2)
+st.write(f'''
+          There are {answer2} pixels with porosity >P{porThresh}
+          and fracture density >P{fracThresh}!
+          ''')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer2)
     st.write(result)
@@ -129,21 +170,34 @@ if st.button(f'Check question {questionNum}'):
 ## Q3!
 questionNum = 3
 st.header(f'Question {questionNum}')
+st.write('''
+         Finally, let's stack our reliability map and the subsurface property
+         map to see which areas stand out.
+         ''')
 
 with st.echo():
-    def prospects(maps):
-        maps_comb = maps[-1,:,:] * ~zrmap * a50map
 
-        plt.imshow(maps_comb)
-        plt.title('Prospects')
-        plt.colorbar()
-        st.pyplot()
+    pmap = maps[-1,:,:] * ~zrmap * aXXmap
 
-        return maps_comb
-    pmap = prospects(maps)
+    plt.imshow(pmap)
+    plt.title('Prospects')
+    plt.colorbar()
+    st.pyplot()
+
     answer3 = int(np.sum(pmap==1))
 
-st.write('Count of >P50 vals: ', answer3)
+st.write(f'''
+         There are {answer3} prospective pixels on this map
+         using the cut-offs assigned above.
+         ''')
+
+if porThresh!=50 or fracThresh!=50:
+    st.warning('''
+               **Warning!** The current cut-offs don't match
+               the official answer to the question. Check sliders for
+               question 2 if you are testing the accuracy of the solution.
+               ''')
+
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer3)
     st.write(result)
@@ -152,18 +206,29 @@ if st.button(f'Check question {questionNum}'):
 ## Q4!
 questionNum = 4
 st.header(f'Question {questionNum}')
+st.write('''
+         X marks the spot! Let's calculate the center of mass of the largest
+         'prospect' or continuous blob of pixels.
+         ''')
 
 with st.echo():
     def com(pmap):
+        '''
+        Find the center of mass of the largest blob on our binary map.
+        Return the coordinates of this point.
+        '''
+        ## find discrete blobs of pixels and label
         label, numFeat = measure.label(pmap)
         counts = np.bincount(label.ravel())
         label_big = np.argmax(counts[1:])+1
+
+        ## get the center of mass using the label of the largest prospect
         lat, lon = measure.center_of_mass(input=pmap, labels=label, index=label_big)
 
-        plt.imshow(pmap)
+        ## plot the prospect labels and an x on the center of mass for the largest
+        plt.imshow(label, cmap='tab20')
         plt.title('Prospect Center of Mass')
         plt.scatter(lon, lat, s=125, c='red', marker='x')        
-        plt.colorbar()
         st.pyplot()
 
         return lat, lon
@@ -171,7 +236,15 @@ with st.echo():
     lat, lon = com(pmap)
     answer4 = int(np.floor(lat) * np.floor(lon))
 
-st.write('Product of largest prospect coordinates: ', answer4)
+st.write(f'The product of largest prospect coordinates is {answer4}.')
+
+if porThresh!=50 or fracThresh!=50:
+    st.warning('''
+               **Warning!** The current cut-offs don't match
+               the official answer to the question. Check sliders for
+               question 2 if you are testing the accuracy of the solution.
+               ''')
+
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer4)
     st.write(result)

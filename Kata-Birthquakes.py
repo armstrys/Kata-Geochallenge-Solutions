@@ -45,7 +45,7 @@ if st.checkbox('Uncheck to hide instructions for this challenge.', value=True):
     st.markdown(r.text)
 
 ## Set up request framework for QA
-st.header('Solution')
+st.title('My solution')
 st.markdown('''For this challenge, the data will come from a date if entered in the same format as the date below.
                Feel free to change it to check the consistency of answers!
             ''')
@@ -54,24 +54,35 @@ my_key = st.text_input(label='Enter a key to initiate request (any string of cha
 ## Input
 r = get_data(url, my_key)
 
-st.header('The first 1000 input data:')
+st.subheader('The first 1000 input data:')
 st.text(r.text[:1000])
+st.write('''
+        These text records are separated by `\\n` and `|` and therefore should
+        be handled pretty nicely by the `pandas.read_csv`. We just need use `io.StringIO`
+        to convert the text to something Pandas can read.
+        ''')
 with st.echo():
-    
+
+    ## read text to pandas
     data = pd.read_csv(io.StringIO(r.text),sep='|') #load text to pandas
+
+    ## Strip comment character out of headers
     cols = data.columns
     data.columns = [c.strip('#') for c in cols] # strip comment characters out of columns
 
-st.dataframe(data)
+st.write('First 10 rows of the dataframe:')
+st.dataframe(data.head(10))
 
 ## Q1!
 questionNum = 1
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('How many records do we have?')
 
 with st.echo():
-    answer1 = int(len(data))
 
-st.write('Number of records: ', answer1)
+    answer1 = len(data)
+
+st.write(f'There are {answer1} records.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.write(result)
@@ -79,18 +90,20 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q2!
 questionNum = 2
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('What is the depth of the largest earthquake?')
 
 with st.echo():
+    ## Sort by magnitude and depth to make sure we match the right criteria
     data.sort_values(by=['Magnitude','Depth/km'], ascending=False, inplace=True)
-    data.reset_index(inplace=True)
-    depth = data.loc[0,'Depth/km']*1e3
+
+    ## Pull the top record and get the depth in meters.
+    depth = data.iloc[0]['Depth/km']*1e3
+    answer2 = round(depth)
 
 st.dataframe(data.head())
 
-answer2 = int(depth)
-
-st.write('Depth of largest earthquake in meters: ', answer2)
+st.write(f'The largest earthquake on this day was {answer2:.0f} meters deep!')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer2)
     st.write(result)
@@ -98,7 +111,13 @@ if st.button(f'Check question {questionNum}'):
 
 ## Q3!
 questionNum = 3
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         Now we will define the Haversin formula, which Streamlit unfortunately didn't
+         render correctly in the instructions. [Here is the wikipedia entry.](https://en.wikipedia.org/wiki/Haversine_formula)
+         We then use this formula to calculate the distance between the two
+         largest earthquakes from the datafrane we sorted in question 2.
+         ''')
 
 with st.echo():
     def haversine(loc1, loc2, r=6371.0):
@@ -112,29 +131,35 @@ with st.echo():
         d = 2*r*np.arcsin(np.sqrt(a+b))
         return round(d)
 
-loc1 = data.loc[0,['Latitude','Longitude']].values
-loc2 = data.loc[1,['Latitude','Longitude']].values
-answer3 = int(haversine(loc1, loc2))
+    loc1 = data.iloc[0][['Latitude','Longitude']].values
+    loc2 = data.iloc[1][['Latitude','Longitude']].values
+    answer3 = int(haversine(loc1, loc2))
 
-st.write('Distance between two largest quakes in km: ', answer3)
-if st.button('Check question '+str(questionNum)):
+st.write(f'The epicenters of the two largest earthquakes were ~{answer3} km apart.')
+if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer3)
     st.write(result)
 
 
 ## Q4!
 questionNum = 4
-st.header(f'Question {questionNum}')
+st.subheader(f'Question {questionNum}')
+st.write('''
+         Lastly, let's check how many pairs of earthquakes were within 100 km
+         of each other on this day.
+         ''')
 
 with st.echo():
     count = 0
-    for loc1, loc2 in itertools.combinations(data.loc[:,['Latitude','Longitude']].values,2):
+    comb = itertools.combinations(data.loc[:,['Latitude','Longitude']].values,2)
+
+    for loc1, loc2 in comb:
         if haversine(loc1,loc2) < 100:
             count += 1
 
 answer4 = int(count)
 
-st.write('Pairs of earthquakes within 100 km: ', answer4)
+st.write(f'There were {answer4} pairs of earthquakes within 100 km of each other.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer4)
     st.write(result)
