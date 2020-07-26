@@ -41,7 +41,7 @@ def check_answer(questionNum,answer):
 url = 'https://kata.geosci.ai/challenge/birthquakes' 
 r = get_question(url)
 
-if st.checkbox('Uncheck to hide instructions for this challenge.', value=True):
+if st.checkbox('**Check to show instructions from Agile for this challenge.**', value=False):
     st.markdown(r.text)
 
 ## Set up request framework for QA
