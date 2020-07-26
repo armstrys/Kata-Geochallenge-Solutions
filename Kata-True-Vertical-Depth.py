@@ -87,7 +87,7 @@ with st.echo():
 
     answer1 = data['Datum'].max()
 
-st.write(f'The highest elevation well is at **{answer1} m** elevation.)
+st.write(f'The highest elevation well is at **{answer1} m** elevation.')
 if st.button(f'Check question {questionNum}'):
     result = check_answer(questionNum,answer1)
     st.write(result)
