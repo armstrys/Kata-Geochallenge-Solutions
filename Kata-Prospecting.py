@@ -1,5 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import seaborn as sns
 import requests
 import numpy as np
 from scipy.ndimage import measurements as measure
@@ -144,17 +145,28 @@ with st.echo():
         count = np.sum(pmaps_comb==1)
 
         plt.imshow(pmaps_comb)
-        plt.title('Por and fracture density both > P50')
+        plt.title(f'Por is >P{porThresh} and fracture density >P{fracThresh}')
         plt.colorbar()
         st.pyplot()
 
         return pmaps_comb
     
-    porThresh = st.slider(label='Porosity percentile threshold',
-                          min_value=0, max_value=100, value=50, step=5)
-    fracThresh = st.slider(label='Fracture density percentile threshold',
-                           min_value=0, max_value=100, value=50, step=5)
+    porThresh = 50
+    fracThresh = 50
+    
+    st.write('Which strategy do you want to pursue?')
+    if st.button('Favor fracture density over porosity'):
+        fracThresh = 67
+        porThresh = 33
 
+    if st.button('Balanced strategy'):
+        fracThresh = 50
+        porThresh = 50
+    
+    if st.button('Favor porosity over fracture density'):
+        fracThresh = 33
+        porThresh = 67
+    
     aXXmap = abovePXX(maps, porThresh, fracThresh)
     answer2 = int(np.sum(aXXmap==1))
 
@@ -171,8 +183,8 @@ if st.button(f'Check question {questionNum}'):
 questionNum = 3
 st.header(f'Question {questionNum}')
 st.write('''
-         Finally, let's stack our reliability map and the subsurface property
-         map to see which areas stand out.
+         Finally, let's stack the subsurface properties with our reliability
+         and land maps to see which areas stand out.
          ''')
 
 with st.echo():
@@ -194,7 +206,7 @@ st.write(f'''
 if porThresh!=50 or fracThresh!=50:
     st.warning('''
                **Warning!** The current cut-offs don't match
-               the official answer to the question. Check sliders for
+               the official answer to the question. Check inputs for
                question 2 if you are testing the accuracy of the solution.
                ''')
 
@@ -241,7 +253,7 @@ st.write(f'The product of largest prospect coordinates is **{answer4}**.')
 if porThresh!=50 or fracThresh!=50:
     st.warning('''
                **Warning!** The current cut-offs don't match
-               the official answer to the question. Check sliders for
+               the official answer to the question. Check inputs for
                question 2 if you are testing the accuracy of the solution.
                ''')
 
