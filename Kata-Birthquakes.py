@@ -113,7 +113,7 @@ if st.button(f'Check question {questionNum}'):
 questionNum = 3
 st.subheader(f'Question {questionNum}')
 st.write('''
-         Now we will define the Haversin formula, which Streamlit unfortunately didn't
+         Now we will define the Haversine formula, which Streamlit unfortunately didn't
          render correctly in the instructions. [Here is the wikipedia entry.](https://en.wikipedia.org/wiki/Haversine_formula)
          We then use this formula to calculate the distance between the two
          largest earthquakes from the datafrane we sorted in question 2.
