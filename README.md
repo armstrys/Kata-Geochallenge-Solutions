@@ -5,7 +5,7 @@ The files in this repository are my solutions to these challenges. If you are lo
 You can run the [Streamlit](https://github.com/streamlit/streamlit) dashboards in this repository by calling `Streamlit run` on the Github raw link for a file within an Python environment that has Streamlit installed. For example,
 
 ```
-streamlit run https://raw.githubusercontent.com/armstrys/Kata-Geochallenge-Solutions/master/Kata-Prospecting.py
+streamlit run https://raw.githubusercontent.com/armstrys/Kata-Geochallenge-Solutions/master/streamlit-dashboards/04-Kata-Prospecting.py
 ```
 
 Dependencies:
